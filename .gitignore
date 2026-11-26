@@ -1,0 +1,21 @@
+# secrets and local config
+*.key
+.env
+.env.*
+sources.json
+ov.conf
+ovcli.conf
+
+# exported data and runtime state
+cloud/
+data/
+ingest-staging/
+logs/
+*.log
+export_state.json
+owned.json
+refs/
+
+# misc
+.DS_Store
+__pycache__/

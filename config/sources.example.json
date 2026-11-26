@@ -1,0 +1,22 @@
+{
+  "local_dirs": [
+    { "path": "~/notes/projects/project-a", "to": "viking://resources/projects/project-a" },
+    { "path": "~/notes/memory", "to": "viking://resources/memory" }
+  ],
+  "include": "*.md",
+  "ignore_dirs": "node_modules,.git,dist,build",
+
+  "sessions": {
+    "root": "~/.claude/projects",
+    "since": "2026-01-01",
+    "exclude_session_ids": []
+  },
+
+  "cloud_docs": {
+    "exporter": "exporters/my_exporter.py",
+    "owned_list": "~/.openviking/cloud/owned.json",
+    "reference_seeds": ["<seed-doc-id>"],
+    "reference_depth": 2,
+    "table_part_rows": 500
+  }
+}

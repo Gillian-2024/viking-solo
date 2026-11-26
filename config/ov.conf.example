@@ -1,0 +1,44 @@
+{
+  "service_name": "openviking-server",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 1933,
+    "user_config_defaults": {
+      "memory_policy": { "memory_types": ["profile", "events", "entities"] }
+    }
+  },
+  "storage": {
+    "workspace": "${HOME}/.openviking/data",
+    "vectordb": { "name": "context", "backend": "local" },
+    "agfs": { "backend": "local" }
+  },
+  "embedding": {
+    "dense": {
+      "provider": "openai",
+      "api_base": "http://127.0.0.1:11434/v1",
+      "api_key": "ollama",
+      "model": "bge-m3",
+      "dimension": 1024
+    }
+  },
+  "vlm": {
+    "provider": "openai",
+    "api_base": "https://your-openai-compatible-gateway/v1",
+    "api_key": "${LLM_API_KEY}",
+    "model": "your-model-name"
+  },
+  "ingest": {
+    "enabled": true,
+    "server_url": "http://127.0.0.1:1933",
+    "api_key": "",
+    "account": "default",
+    "user": "default",
+    "harnesses": {
+      "claude_code": {
+        "enabled": true,
+        "mode": "backfill",
+        "paths": ["${HOME}/.openviking/ingest-staging/claude_code"]
+      }
+    }
+  }
+}

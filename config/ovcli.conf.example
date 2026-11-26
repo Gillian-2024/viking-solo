@@ -1,0 +1,10 @@
+{
+  "url": "http://127.0.0.1:1933",
+  "api_key": "",
+  "plugin": {
+    "claude_code": {
+      "autoRecall": true,
+      "autoCapture": false
+    }
+  }
+}
