@@ -12,6 +12,10 @@
     "exclude_session_ids": []
   },
 
+  "notify": {
+    "command": ["~/viking-solo/exporters/notify_task_example.sh"]
+  },
+
   "cloud_docs": {
     "exporter": "exporters/my_exporter.py",
     "owned_list": "~/.openviking/cloud/owned.json",

@@ -12,6 +12,7 @@
 | `export-docs` | `owned_list` | 每篇文档写成一个 `.md` 到 `~/.openviking/cloud/docs/` |
 | `export-tables` | `owned_list` | 每张表写到 `~/.openviking/cloud/docs/tables/<表名>/part_NNN.md` |
 | `export-refs <depth> <id>...` | 种子文档 id | 第 N 层引用写到 `~/.openviking/cloud/refs/l<N>/`，下一层种子写到 `l<N>_next.json` |
+| `check` | 无 | 登录态 / 连通性检查，正常退出码 0，失败非 0（每日自检据此提醒你重新登录） |
 
 ## 输出格式
 
