@@ -4,9 +4,11 @@
 
 > Stop re-explaining yourself to AI: your docs, definitions and past decisions are recalled automatically.
 
-viking-solo 是一套**单人、单机**的工作知识库搭法：把你本地的项目笔记、云文档和 Claude Code 历史会话整理进本机的 [OpenViking](https://github.com/volcengine/OpenViking)，再通过 OpenViking 的 Claude Code 插件，让每次对话开始前自动召回相关上下文。
+viking-solo 是一套**单人、单机**的工作知识库搭法：把你本地的项目笔记、云文档和 Claude Code 历史会话整理进本机的 OpenViking，再通过 OpenViking 的 Claude Code 插件，让每次对话开始前自动召回相关上下文。
 
-它不是一个新产品，而是一组配置 + 脚本 + 踩坑记录。OpenViking 需要单独安装。
+底座用的是**火山引擎开源的 [OpenViking](https://github.com/volcengine/OpenViking)**：面向 AI Agent 的上下文数据库，用 `viking://` 虚拟文件系统组织资料、记忆和技能，每层目录自动生成摘要，检索可以限定在某个子目录内。本仓库用的是它的开源自部署版（AGPLv3），没有用火山引擎的托管服务，数据全部留在本机。
+
+viking-solo 不是一个新产品，而是在 OpenViking 之上的一组配置 + 脚本 + 踩坑记录，不修改 OpenViking 本身的代码。OpenViking 需要单独安装。
 
 ---
 
@@ -115,3 +117,8 @@ scripts/     服务启动、每日同步、会话导入、launchd 安装
 exporters/   云文档导出器接口与说明
 docs/        踩坑记录
 ```
+
+## 致谢
+
+- [OpenViking](https://github.com/volcengine/OpenViking)：火山引擎开源的 AI Agent 上下文数据库，本方案的全部存储、检索、记忆提取和 Claude Code 插件都来自它。使用前请阅读其 [文档](https://docs.openviking.ai) 和许可证（主项目 AGPLv3）。
+- [Ollama](https://ollama.com) 与 [BGE-M3](https://huggingface.co/BAAI/bge-m3)：本地 embedding。
