@@ -61,6 +61,12 @@ AI 会话日志 ──┘      (每日增量)          ├─ embedding: 本地 
 ### 前置条件
 
 - macOS，或 Linux（systemd），或 Windows 上的 WSL2（需开启 systemd）。自启和定时：macOS 用 launchd，Linux / WSL2 用 systemd user 服务
+
+  | 平台 | 验证情况 |
+  |---|---|
+  | macOS | 真机 launchd：服务常驻、被杀后自动拉起、定时同步按时触发 |
+  | Linux（systemd） | Ubuntu 24.04 真实 systemd：服务常驻、被杀后自动重启、重启机器后自动恢复、定时同步可执行 |
+  | WSL2 | 与 Linux 走同一套 systemd 逻辑，尚未在 Windows 真机验证，欢迎反馈 |
 - Python 3.10+、[uv](https://docs.astral.sh/uv/)、Node.js 18+
 - [Ollama](https://ollama.com)
 - 一个 OpenAI 兼容的 Chat Completions 接口，用于生成摘要和提取记忆
