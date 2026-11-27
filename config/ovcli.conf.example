@@ -4,7 +4,8 @@
   "plugin": {
     "claude_code": {
       "autoRecall": true,
-      "autoCapture": false
+      "autoCapture": false,
+      "recallCompress": "off"
     }
   }
 }

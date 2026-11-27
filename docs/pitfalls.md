@@ -73,3 +73,11 @@ dev 模式下 ROOT 调 `ov task cancel` 会报 `PERMISSION_DENIED`。重启服�
 从历史会话里提取出的偏好，常见同一主题的中英文两份，或者同一个人存在两个身份目录下。
 
 **做法**：如果你已经有手写的规则/偏好体系，就别让 OpenViking 存偏好，见第 5 条。
+
+## 11. 召回压缩会让 Claude Code 的提问钩子超时
+
+插件对 Claude Code 默认开启召回压缩（`recallCompress=auto`）：召回本身不到 1 秒，之后它会另起一个 `claude -p --model haiku` 子进程压缩结果。如果你的 Claude Code 走的是自定义网关或代理，这个子进程用的是默认的 `claude` 配置，往往调不通，会一直挂到超时。我这里实测卡了 110 秒，超过 UserPromptSubmit 钩子的 60 秒上限，报 `UserPromptSubmit hook timed out after 60s`，召回结果也被丢弃。
+
+**做法**：在 `ovcli.conf` 的 `plugin.claude_code` 里加 `"recallCompress": "off"`，钩子耗时降到 0.3 秒以内。召回仍受 token 预算限制，关掉压缩影响很小。别去调大 `hooks.json` 的 `timeout`：那只会让每次提问多等，且该文件在插件缓存目录里，升级就被覆盖。
+
+排查方法：设 `OPENVIKING_DEBUG=1`，手动把一段 JSON 喂给 `auto-recall.mjs`，看 `~/.openviking/logs/cc-hooks.log` 停在哪个 stage；出现 `host_compressor_failed` 且 `timedOut: true` 就是这个问题。
