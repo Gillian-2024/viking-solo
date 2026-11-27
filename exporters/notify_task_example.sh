@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 # Example `notify.command`: create a to-do in your task tool for each alert.
 # Called by scripts/notify.py as:  notify_task_example.sh <title> <body>
 #

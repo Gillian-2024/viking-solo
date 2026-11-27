@@ -60,7 +60,7 @@ AI 会话日志 ──┘      (每日增量)          ├─ embedding: 本地 
 
 ### 前置条件
 
-- macOS（用 launchd 做自启和定时；Linux 可改 systemd）
+- macOS，或 Linux（systemd），或 Windows 上的 WSL2（需开启 systemd）。自启和定时：macOS 用 launchd，Linux / WSL2 用 systemd user 服务
 - Python 3.10+、[uv](https://docs.astral.sh/uv/)、Node.js 18+
 - [Ollama](https://ollama.com)
 - 一个 OpenAI 兼容的 Chat Completions 接口，用于生成摘要和提取记忆
@@ -69,13 +69,17 @@ AI 会话日志 ──┘      (每日增量)          ├─ embedding: 本地 
 
 1. **装依赖**
    ```bash
+   # macOS
    brew install ollama && brew services start ollama
+   # Linux / WSL2（官方安装脚本会顺带注册 systemd 服务）
+   curl -fsSL https://ollama.com/install.sh | sh
+
    ollama pull bge-m3
    uv tool install openviking
    ```
 2. **写配置**：复制 `config/ov.conf.example` 到 `~/.openviking/ov.conf`，填你的网关地址和模型名；API key 写进 `~/.openviking/llm.key`（`chmod 600`），不要写进配置文件
 3. **自检**：`openviking-server doctor`
-4. **常驻服务**：`scripts/install-launchd.sh` 会安装两个 launchd 任务——服务常驻、每日同步
+4. **常驻服务**：`scripts/install-service.sh [HH:MM]` 按系统自动选择：macOS 装两个 launchd 任务，Linux / WSL2 装 systemd user 服务 + 定时器——服务常驻、每日同步（默认 11:30）。WSL2 先在 `/etc/wsl.conf` 写 `[boot]` `systemd=true` 并 `wsl --shutdown` 重启；没有 systemd 时脚本会提示改用手动启动 + cron
 5. **配置你的数据源**：复制 `config/sources.example.json` 到 `~/.openviking/sources.json`，列出要导入的目录和云文档种子
 6. **首次导入**：`scripts/daily-sync.sh`
 7. **接入 Claude Code**：按 OpenViking 官方文档安装 `openviking-memory` 插件，然后把 `config/ovcli.conf.example` 里的插件开关合并进 `~/.openviking/ovcli.conf`
@@ -110,7 +114,7 @@ AI 会话日志 ──┘      (每日增量)          ├─ embedding: 本地 
 
 通道：
 
-- **macOS 系统通知**：默认开启
+- **桌面通知**：macOS 用系统通知，Linux 用 `notify-send`（没有就跳过；服务器 / WSL2 建议配下面的任务工具通道）
 - **你的任务工具**：在 `sources.json` 的 `notify.command` 填一个命令，`scripts/notify.py` 会按 `<命令> <标题> <正文>` 调用它。参考 `exporters/notify_task_example.sh`，把它换成调用你日常用的任务 / IM 工具的创建任务接口
 - **去重**：同一问题只在首次出现时提醒一次，问题消失后再发一条「已恢复」
 - **待办清单**：同时写到 `~/.openviking/logs/attention.md`
@@ -135,7 +139,7 @@ AI 会话日志 ──┘      (每日增量)          ├─ embedding: 本地 
 
 ```
 config/      配置模板（不含任何密钥）
-scripts/     服务启动、每日同步、会话导入、launchd 安装
+scripts/     服务启动、每日同步、会话导入、自启安装（launchd / systemd）
 exporters/   云文档导出器接口与说明
 docs/        踩坑记录
 ```

@@ -3,7 +3,7 @@
 Usage: python3 notify.py "<issue 1>" "<issue 2>" ...   (no args = all clear)
 
 Channels:
-  - macOS notification (always)
+  - desktop notification: macOS osascript / Linux notify-send (skipped if unavailable)
   - your own command, if `notify.command` is set in ~/.openviking/sources.json.
     It is called as: <command...> <title> <body>
     Use it to create a task in your work IM / task tool, so the reminder lands
@@ -14,6 +14,7 @@ when it clears. State lives in ~/.openviking/state/notified.json.
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -48,10 +49,23 @@ def send(title, body):
                 raise RuntimeError((p.stderr or p.stdout).strip()[-300:])
         except Exception as ex:
             log(f"自定义通知失败「{title}」：{ex}")
-    # title/body go in as argv, not spliced into the AppleScript source
-    subprocess.run(["osascript", "-e", "on run argv", "-e",
-                    "display notification (item 2 of argv) with title (item 1 of argv)", "-e", "end run",
-                    TAG + title, body[:200]], capture_output=True, timeout=10)
+    desktop(TAG + title, body[:200])
+
+
+def desktop(title, body):
+    if sys.platform == "darwin":
+        # title/body go in as argv, not spliced into the AppleScript source
+        cmd = ["osascript", "-e", "on run argv", "-e",
+               "display notification (item 2 of argv) with title (item 1 of argv)", "-e", "end run",
+               title, body]
+    elif shutil.which("notify-send"):
+        cmd = ["notify-send", title, body]
+    else:
+        return  # headless Linux / WSL: rely on notify.command and attention.md
+    try:
+        subprocess.run(cmd, capture_output=True, timeout=10)
+    except Exception as ex:
+        log(f"桌面通知失败「{title}」：{ex}")
 
 
 def main():

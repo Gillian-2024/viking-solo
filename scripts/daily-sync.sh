@@ -1,11 +1,11 @@
-#!/bin/zsh
-# Daily refresh of a personal OpenViking store. Run by launchd (viking-solo.sync).
+#!/usr/bin/env bash
+# Daily refresh of a personal OpenViking store. Run by launchd / systemd timer (viking-solo sync).
 # Local files stay the source of truth; this only re-imports them.
 set -u
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 export NO_PROXY="127.0.0.1,localhost"
 export LLM_API_KEY="$(cat "$HOME/.openviking/llm.key")"
-REPO="${0:A:h:h}"
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
 CONF="$HOME/.openviking/sources.json"
 cfg() { python3 -c "import json,os,sys;c=json.load(open('$CONF'));print(eval(sys.argv[1]))" "$1"; }
 echo "=== $(date '+%F %T') sync start"
@@ -52,8 +52,15 @@ fi
 # 5. Health check: anything that needs you goes to attention.md + notify.py
 ATT="$HOME/.openviking/logs/attention.md"
 issues=()
-curl -fsS -m 5 http://127.0.0.1:1933/health >/dev/null || issues+=("OpenViking 服务不通：launchctl kickstart -k gui/\$(id -u)/viking-solo.server")
-curl -fsS -m 5 http://127.0.0.1:11434/api/version >/dev/null || issues+=("Ollama 不通：brew services restart ollama")
+if [[ "$(uname -s)" == Darwin ]]; then
+  restart_server="launchctl kickstart -k gui/\$(id -u)/viking-solo.server"
+  restart_ollama="brew services restart ollama"
+else
+  restart_server="systemctl --user restart viking-solo-server"
+  restart_ollama="systemctl restart ollama（或重新运行 ollama serve）"
+fi
+curl -fsS -m 5 http://127.0.0.1:1933/health >/dev/null || issues+=("OpenViking 服务不通：$restart_server")
+curl -fsS -m 5 http://127.0.0.1:11434/api/version >/dev/null || issues+=("Ollama 不通：$restart_ollama")
 if [[ -x "$EXPORTER" ]] && ! "$EXPORTER" check >/dev/null 2>&1; then
   issues+=("云文档导出器检查失败（多半是登录过期）：重新登录你的云文档工具")
 fi
@@ -63,11 +70,11 @@ failed=$(ov task list 2>&1 | grep -c failed)
   issues+=("偏好记忆又出现了：检查 ov.conf 的 memory_policy 是否生效")
 size=$(du -sm "$HOME/.openviking/data" | cut -f1)
 [[ $size -gt 5000 ]] && issues+=("知识库数据已 ${size}MB，超过 5GB：检查 data/temp 等可清理目录")
-if (( ${#issues} )); then
+if (( ${#issues[@]} )); then
   { echo "# viking-solo 待处理（$(date '+%F %T')）"; for i in "${issues[@]}"; do echo "- $i"; done; } > "$ATT"
 else
   rm -f "$ATT"
 fi
-python3 "$REPO/scripts/notify.py" "${issues[@]}"
+python3 "$REPO/scripts/notify.py" ${issues[@]+"${issues[@]}"}
 
 echo "=== $(date '+%F %T') sync done"
